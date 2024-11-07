@@ -1,9 +1,7 @@
 /** @type {import('next').NextConfig} */
 const nextConfig = {
-    experimental: {
-        appDir: true,
-    },
-    serverExternalPackages: ["mongoose"], // Move this out of experimental
+    // Remove appDir from experimental
+    serverExternalPackages: ["mongoose"], // This is now correctly placed outside experimental
     images: {
         domains: ['lh3.googleusercontent.com'],
     },
