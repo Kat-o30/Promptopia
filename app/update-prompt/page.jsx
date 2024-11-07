@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
-
 import Form from "@components/Form";
 
 const UpdatePrompt = () => {
@@ -10,18 +9,27 @@ const UpdatePrompt = () => {
   const searchParams = useSearchParams();
   const promptId = searchParams.get("id");
 
-  const [post, setPost] = useState({ prompt: "", tag: "", });
+  const [post, setPost] = useState({ prompt: "", tag: "" });
   const [submitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
     const getPromptDetails = async () => {
-      const response = await fetch(`/api/prompt/${promptId}`);
-      const data = await response.json();
+      try {
+        const response = await fetch(`/api/prompt/${promptId}`);
 
-      setPost({
-        prompt: data.prompt,
-        tag: data.tag,
-      });
+        if (!response.ok) {
+          throw new Error("Network response was not ok");
+        }
+
+        const text = await response.text();
+        const data = text ? JSON.parse(text) : {};
+
+        setPost({
+          prompt: data.prompt,
+        });
+      } catch (error) {
+        console.error("Failed to fetch prompt details:", error);
+      }
     };
 
     if (promptId) getPromptDetails();
@@ -36,6 +44,9 @@ const UpdatePrompt = () => {
     try {
       const response = await fetch(`/api/prompt/${promptId}`, {
         method: "PATCH",
+        headers: {
+          "Content-Type": "application/json",
+        },
         body: JSON.stringify({
           prompt: post.prompt,
           tag: post.tag,
@@ -44,6 +55,8 @@ const UpdatePrompt = () => {
 
       if (response.ok) {
         router.push("/");
+      } else {
+        console.error("Failed to update prompt:", response.statusText);
       }
     } catch (error) {
       console.log(error);
@@ -54,7 +67,7 @@ const UpdatePrompt = () => {
 
   return (
     <Form
-      type='Edit'
+      type="Edit"
       post={post}
       setPost={setPost}
       submitting={submitting}
