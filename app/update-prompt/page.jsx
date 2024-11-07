@@ -1,40 +1,43 @@
 "use client";
 
 import React, { useState, useEffect, Suspense } from "react";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "next/navigation";
 import Form from "@components/Form";
 
 const UpdatePrompt = () => {
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const promptId = searchParams.get("id");
-
+  const [promptId, setPromptId] = useState(null);
   const [post, setPost] = useState({ prompt: "", tag: "" });
   const [submitting, setIsSubmitting] = useState(false);
 
   useEffect(() => {
-    const getPromptDetails = async () => {
-      try {
-        const response = await fetch(`/api/prompt/${promptId}`);
+    // Extract promptId from the URL when the component is mounted
+    const url = new URL(window.location.href);
+    const id = url.searchParams.get("id");
+    setPromptId(id);
 
-        if (!response.ok) {
-          throw new Error("Network response was not ok");
+    if (id) {
+      const getPromptDetails = async () => {
+        try {
+          const response = await fetch(`/api/prompt/${id}`);
+
+          if (!response.ok) throw new Error("Network response was not ok");
+
+          const text = await response.text();
+          const data = text ? JSON.parse(text) : {};
+
+          setPost({
+            prompt: data.prompt,
+            tag: data.tag,
+          });
+        } catch (error) {
+          console.error("Failed to fetch prompt details:", error);
         }
+      };
 
-        const text = await response.text();
-        const data = text ? JSON.parse(text) : {};
-
-        setPost({
-          prompt: data.prompt,
-          tag: data.tag,
-        });
-      } catch (error) {
-        console.error("Failed to fetch prompt details:", error);
-      }
-    };
-
-    if (promptId) getPromptDetails();
-  }, [promptId]);
+      getPromptDetails();
+    }
+  }, []);
 
   const updatePrompt = async (e) => {
     e.preventDefault();
