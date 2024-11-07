@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import React, { useState, useEffect, Suspense } from "react";
 import { useRouter, useSearchParams } from "next/navigation";
 import Form from "@components/Form";
 
@@ -26,6 +26,7 @@ const UpdatePrompt = () => {
 
         setPost({
           prompt: data.prompt,
+          tag: data.tag,
         });
       } catch (error) {
         console.error("Failed to fetch prompt details:", error);
@@ -65,14 +66,35 @@ const UpdatePrompt = () => {
     }
   };
 
+  const deletePrompt = async () => {
+    if (!promptId) return alert("Missing PromptId!");
+
+    try {
+      const response = await fetch(`/api/prompt/${promptId}`, {
+        method: "DELETE",
+      });
+
+      if (response.ok) {
+        router.push("/");
+      } else {
+        console.error("Failed to delete prompt:", response.statusText);
+      }
+    } catch (error) {
+      console.log(error);
+    }
+  };
+
   return (
-    <Form
-      type="Edit"
-      post={post}
-      setPost={setPost}
-      submitting={submitting}
-      handleSubmit={updatePrompt}
-    />
+    <Suspense fallback={<div>Loading...</div>}>
+      <Form
+        type="Edit"
+        post={post}
+        setPost={setPost}
+        submitting={submitting}
+        handleSubmit={updatePrompt}
+      />
+      <button onClick={deletePrompt}>Delete</button>
+    </Suspense>
   );
 };
 
