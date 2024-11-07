@@ -2,8 +2,8 @@
 const nextConfig = {
     experimental: {
         appDir: true,
-        serverComponentsExternalPackages: ["mongoose"],
     },
+    serverExternalPackages: ["mongoose"], // Move this out of experimental
     images: {
         domains: ['lh3.googleusercontent.com'],
     },
@@ -11,9 +11,9 @@ const nextConfig = {
         config.experiments = {
             ...config.experiments,
             topLevelAwait: true,
-        }
-        return config
+        };
+        return config;
     }
-}
+};
 
-export default nextConfig
+export default nextConfig;
